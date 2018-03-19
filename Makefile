@@ -6,7 +6,7 @@
 OBJ=net.o hiredis.o sds.o async.o read.o hiarray.o hiutil.o command.o crc16.o adlist.o hircluster.o
 EXAMPLES=hiredis-example hiredis-example-libevent hiredis-example-libev hiredis-example-glib
 TESTS=hiredis-test
-LIBNAME=libhiredis_vip
+LIBNAME=libhiredis_cluster
 PKGCONFNAME=hiredis_vip.pc
 
 HIREDIS_VIP_MAJOR=$(shell grep HIREDIS_VIP_MAJOR hircluster.h | awk '{print $$3}')
