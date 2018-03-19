@@ -3,15 +3,18 @@
 #include <map>
 #include <iostream>
 
+#include "LibStdCout.h"
 #ifdef __cplusplus 
     extern "C" {
 #endif 
     #include "hircluster.h"
     #include "adapters/libev.h"
-
 #ifdef __cplusplus
     }
 #endif
+
+
+#define DEBUG_TEST
 
 namespace Test 
 {
@@ -69,7 +72,7 @@ namespace Test
             return ;
         }
         strRedisNode = strRedisNode.substr(0, strRedisNode.size()-1);
-        std::cout << "redis node: " << strRedisNode << "\n";
+        DEBUG_LOG("redis node: %s",strRedisNode.c_str());
 
         m_pRedisCtx = redisClusterAsyncConnect(strRedisNode.c_str(), 
                                                HIRCLUSTER_FLAG_ROUTE_USE_SLOTS);
@@ -86,7 +89,7 @@ namespace Test
         redisClusterAsyncSetDisconnectCallback(m_pRedisCtx, RedisDisConnectCallback);
         m_isConnect = true;
         m_pRedisCtx->data = this;
-        m_iTestNums = 10;
+        m_iTestNums = 4;
     }
     void RedisClusterAsynLibev::RedisDisConnectCallback(const redisAsyncContext *ac, int status) 
     {
@@ -122,8 +125,8 @@ namespace Test
             std::cout << "connect error : " << ac->errstr << "\n";
             return false;
         }
-
-        std::cout << "connected ok, next step is send cmd \n";
+        DEBUG_LOG("connected ok, next step is send cmd");
+        //std::cout << "connected ok, next step is send cmd \n";
         /***    
         int status; 
         for (int i = 0; i < m_iTestNums; ++i) 
@@ -157,7 +160,8 @@ namespace Test
         {
             std::stringstream  ios;
             ios << "libev:" << i;
-            std::cout << "send cmd: " << "set " << ios.str() << " " << i << "\n";
+            DEBUG_LOG("send cmd: set %s %d", ios.str().c_str(), i);
+            //std::cout << "send cmd: " << "set " << ios.str() << " " << i << "\n";
 
             status = redisClusterAsyncCommand(
                 m_pRedisCtx, RedisCmdCallback, &m_iTestNums,
@@ -184,7 +188,8 @@ namespace Test
             //std::cout << "close connect\n";
             //redisClusterAsyncDisconnect(ac);
         }
-        std::cout << "redis cmd call, num: " << all_count << "\n";
+        DEBUG_LOG("redis cmd call, num: %d ", all_count);
+        //std::cout << "redis cmd call, num: " << all_count << "\n";
     }
 }
 
