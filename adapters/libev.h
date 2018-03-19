@@ -36,6 +36,9 @@
 #include "../hiredis.h"
 #include "../async.h"
 
+/**<  增加 对cluster 的支持 */
+#include "../hircluster.h"
+
 typedef struct redisLibevEvents {
     redisAsyncContext *context;
     struct ev_loop *loop;
@@ -142,6 +145,31 @@ static int redisLibevAttach(EV_P_ redisAsyncContext *ac) {
     ev_io_init(&e->rev,redisLibevReadEvent,c->fd,EV_READ);
     ev_io_init(&e->wev,redisLibevWriteEvent,c->fd,EV_WRITE);
     return REDIS_OK;
+}
+
+/**< 增加对cluster 的支持 */
+static int redisLibevAttach_cluster(redisAsyncContext *ac, struct ev_loop *loop) 
+{
+#if EV_MULTIPLICITY
+    return redisLibevAttach(loop, ac);
+#endif
+    return REDIS_ERR;
+}
+
+typedef int (*FUNCAsyContext)(redisAsyncContext*, void*);
+static int redisClusterLibevAttach(EV_P_   redisClusterAsyncContext *acc)
+{
+#if EV_MULTIPLICITY
+    if (loop == NULL || acc == NULL )
+    {
+        return REDIS_ERR;
+    }
+    acc->adapter = loop;
+    acc->attach_fn = (FUNCAsyContext)redisLibevAttach_cluster;
+
+    return REDIS_OK;
+#endif
+    return REDIS_ERR;
 }
 
 #endif
