@@ -30,6 +30,7 @@
 
 #ifndef __HIREDIS_LIBEVENT_H__
 #define __HIREDIS_LIBEVENT_H__
+#include <stdlib.h>
 #include <event.h>
 #include "../hiredis.h"
 #include "../async.h"

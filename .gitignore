@@ -1,7 +1,7 @@
-/hiredis-test
-/examples/hiredis-example*
-/*.o
-/*.so
-/*.dylib
-/*.a
-/*.pc
+hiredis-test
+examples/hiredis-example*
+*.o
+*.so
+*.a
+*.pc
+tags
