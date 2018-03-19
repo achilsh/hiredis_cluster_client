@@ -1,5 +1,4 @@
 hiredis-test
-examples/hiredis-example*
 *.o
 *.so
 *.a
