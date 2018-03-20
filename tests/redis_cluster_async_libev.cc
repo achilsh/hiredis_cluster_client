@@ -40,6 +40,7 @@ namespace Test
          redisClusterAsyncContext *m_pRedisCtx;
          struct ev_loop *m_pLoop;
          int m_iTestNums;
+         int m_iConnData;
     };
     RedisClusterAsynLibev::RedisClusterAsynLibev()
         :m_isConnect(false), m_pRedisCtx(NULL), m_pLoop(NULL),m_iTestNums(10)
@@ -78,8 +79,7 @@ namespace Test
                                                HIRCLUSTER_FLAG_ROUTE_USE_SLOTS);
         if (m_pRedisCtx->err)
         {
-            std::cout << "async connect faild, err Msg: "
-                << m_pRedisCtx->errstr << "\n";
+            DEBUG_LOG("async connect faild, err Msg: %s ", m_pRedisCtx->errstr);
             return ;
         }
         
@@ -89,7 +89,8 @@ namespace Test
         redisClusterAsyncSetDisconnectCallback(m_pRedisCtx, RedisDisConnectCallback);
         m_isConnect = true;
         m_pRedisCtx->data = this;
-        m_iTestNums = 4;
+        m_iTestNums = 1;
+        m_iConnData = 0;
     }
     void RedisClusterAsynLibev::RedisDisConnectCallback(const redisAsyncContext *ac, int status) 
     {
@@ -125,8 +126,28 @@ namespace Test
             std::cout << "connect error : " << ac->errstr << "\n";
             return false;
         }
+        sleep(1);
+        /***
+        int status; 
+        int i = 0; 
+        //for (; i < 2; ++i) 
+        {
+            std::stringstream  ios;
+            ios << "libev:" << i;
+            DEBUG_LOG("connected, send cmd: set %s %d", ios.str().c_str(), i);
+
+            status = redisClusterAsyncCommand(m_pRedisCtx, 
+                                              RedisCmdCallback, &m_iTestNums,
+                                              "set %s %d", ios.str().c_str(), i);
+            //sleep(1);
+            if (status != REDIS_OK)
+            {
+                std::cout << "error no: " << m_pRedisCtx->err
+                    << ", err msg: " << m_pRedisCtx->errstr << "\n";
+            }
+        }
+        ***/
         DEBUG_LOG("connected ok, next step is send cmd");
-        //std::cout << "connected ok, next step is send cmd \n";
         /***    
         int status; 
         for (int i = 0; i < m_iTestNums; ++i) 
@@ -161,11 +182,12 @@ namespace Test
             std::stringstream  ios;
             ios << "libev:" << i;
             DEBUG_LOG("send cmd: set %s %d", ios.str().c_str(), i);
-            //std::cout << "send cmd: " << "set " << ios.str() << " " << i << "\n";
-
+            m_iConnData  = i;
+            //m_pRedisCtx->data = (void*)m_iConnData;
             status = redisClusterAsyncCommand(
                 m_pRedisCtx, RedisCmdCallback, &m_iTestNums,
                 "set %s %d", ios.str().c_str(), i);
+            //sleep(1);
             if (status != REDIS_OK)
             {
                 std::cout << "error no: " << m_pRedisCtx->err
@@ -189,7 +211,6 @@ namespace Test
             //redisClusterAsyncDisconnect(ac);
         }
         DEBUG_LOG("redis cmd call, num: %d ", all_count);
-        //std::cout << "redis cmd call, num: " << all_count << "\n";
     }
 }
 
